@@ -1,0 +1,155 @@
+#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h>
+#include <windows.h>
+#include <time.h>
+
+#define WIDTH 20
+#define HEIGHT 20
+
+int x, y;             
+int fruitX, fruitY;   
+int score;
+int tailX[100], tailY[100];
+int nTail = 0;
+int gameOver = 0;
+int dir = 0;          
+
+void Setup() {
+    srand(time(0));
+    gameOver = 0;
+    dir = 0; 
+    x = WIDTH / 2;
+    y = HEIGHT / 2;
+    fruitX = rand() % WIDTH;
+    fruitY = rand() % HEIGHT;
+    score = 0;
+}
+
+void Draw() {
+    system("cls"); 
+    for (int i=0 ; i<WIDTH+2 ; i++) printf("#");
+    printf("\n");
+
+    for (int i = 0; i < HEIGHT; i++) {
+        for (int j = 0; j < WIDTH; j++) {
+            if (j == 0) printf("#");
+
+            if (i == y && j == x)
+                printf("O"); 
+            else if (i == fruitY && j == fruitX)
+                printf("F"); 
+            else {  
+                int printed = 0;
+                for (int k = 0; k < nTail; k++) {
+                    if (tailX[k] == j && tailY[k] == i) {
+                        printf("o"); 
+                        printed = 1;
+                        break;
+                    }
+                }
+                if (!printed) printf(" ");
+            }
+
+            if (j == WIDTH - 1) printf("#");
+        }
+        printf("\n");
+    }
+
+    for (int i=0 ; i<WIDTH+2 ; i++) printf("#");
+    printf("\n");
+
+    printf("Score: %d\n", score);
+}
+
+void Input() {
+    if (_kbhit()) {
+        switch (_getch()) {
+            case 'a': dir = 1; 
+			break; 
+            case 'd': dir = 2; 
+			break; 
+            case 'w': dir = 3; 
+			break; 
+            case 's': dir = 4; 
+			break; 
+            case 'x': gameOver = 1; 
+			break; 
+        }
+    }
+}
+
+void Logic() {
+    int prevX = tailX[0], prevY = tailY[0];
+    int prev2X, prev2Y;
+    tailX[0] = x;
+    tailY[0] = y;
+
+    for (int i = 1; i < nTail; i++) {
+        prev2X = tailX[i];
+        prev2Y = tailY[i];
+        tailX[i] = prevX;
+        tailY[i] = prevY;
+        prevX = prev2X;
+        prevY = prev2Y;
+    }
+
+    switch(dir) {
+        case 1: x--; 
+		break; 
+        case 2: x++; 
+		break; 
+        case 3: y--; 
+		break; 
+        case 4: y++; 
+		break; 
+    }
+
+    if (x >= WIDTH) x = 0; else if (x < 0) x = WIDTH - 1;
+    if (y >= HEIGHT) y = 0; else if (y < 0) y = HEIGHT - 1;
+
+    for (int i = 0; i < nTail; i++)
+        if (tailX[i] == x && tailY[i] == y)
+            gameOver = 1;
+
+    if (x == fruitX && y == fruitY) {
+        score += 10;
+        fruitX = rand() % WIDTH;
+        fruitY = rand() % HEIGHT;
+        nTail++;
+    }
+    printf("Enter:\na for left turn\ns for down\nd for right turn\nw for up\nx for exit");
+}
+
+int main() {
+    Setup();
+    while (!gameOver) {
+        Draw();
+        Input();
+        Logic();
+        Sleep(100); 
+    }
+    printf("Game Over!\n");
+    system("pause"); 
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
